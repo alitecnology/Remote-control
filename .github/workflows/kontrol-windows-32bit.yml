@@ -1,0 +1,36 @@
+name: Build Kontrol PC (Windows 32-bit)
+on:
+  workflow_dispatch:
+  push:
+    paths: ['windows-control/**']
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          architecture: 'x86'
+
+      - name: Pasang kebutuhan
+        run: pip install -r windows-control/requirements.txt pyinstaller
+
+      - name: Build exe 32-bit
+        run: pyinstaller --onefile --noconsole --name KontrolPC-Windows-32bit windows-control/control_app.py
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KontrolPC-Windows-32bit
+          path: dist/KontrolPC-Windows-32bit.exe
+
+      - name: Terbitkan rilis (tautan unduh tetap)
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          tag: kontrol-pc-latest-32bit
+          name: Kontrol PC (Windows 32-bit)
+          artifacts: dist/KontrolPC-Windows-32bit.exe
+          token: ${{ secrets.GITHUB_TOKEN }}
